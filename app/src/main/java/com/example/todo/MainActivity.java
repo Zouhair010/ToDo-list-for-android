@@ -3,8 +3,8 @@ package com.example.todo;
 import android.app.DatePickerDialog;
 import android.os.Bundle;
 
-import android.os.Bundle;
 import android.widget.ListView;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
@@ -22,9 +22,7 @@ import android.widget.Toast;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-import java.util.Date;
 import java.text.SimpleDateFormat;
-import java.util.GregorianCalendar;
 
 import java.util.ArrayList;
 
@@ -32,14 +30,12 @@ public class MainActivity extends AppCompatActivity {
     // Database helper
     private TaskDatabaseHelper dbHelper;
 
-    // TextView to show date and time
-//    private TextView datetimeTextView;
-
     // Input field for new task
     private TextInputEditText taskTextInput;
 
     // ListView to display tasks
     private ListView listView;
+    private Switch switchTaskButton;
 
     // List to store tasks and adapter for ListView
     public static ArrayList<String> tasks;
@@ -47,8 +43,8 @@ public class MainActivity extends AppCompatActivity {
 
     // Threads for updating time and loading tasks
     private static Thread datetimeThread;
-    private static Thread loadTasksThread;
     private static String taskdate;
+    private static boolean onTodaysTasks;
 
     // Method to continuously update the date/time every second
     private void showDateTime(TextView datetimeTextView) throws InterruptedException {
@@ -70,27 +66,77 @@ public class MainActivity extends AppCompatActivity {
         taskdate = new SimpleDateFormat("dd-MM-yyyy").format(new GregorianCalendar().getTime());
         taskTextInput.setText(""); // Clear input after adding
         db.close();
+        if (onTodaysTasks){
+            loadTasks();
+        }
+        else {
+            loadFutureTasks();
+        }
     }
 
-    // Method to remove a specific task from the database
+    // Method to remove a specific task from the databaseloadTasks()
     private void removeTask(String task) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
-        db.execSQL("DELETE FROM tasks WHERE task=(?)", new Object[]{task});
+        String currentdate = new SimpleDateFormat("dd-MM-yyyy").format(new GregorianCalendar().getTime());
+        db.execSQL("DELETE FROM tasks WHERE task=(?) AND taskDate=(?)", new Object[]{task,currentdate});
+        db.close();
+    }
+    private void removeFutureTask(String taskAndDate) {
+        char[] chars = taskAndDate.toCharArray();
+        ArrayList<String> items = new ArrayList<>();
+        int indexNextString=-1;
+        String task = "";
+        String date = "";
+        for (int i=0 ; i<chars.length ; i++) {
+            if (chars[i]==':'){
+                indexNextString = i+1;
+                task = String.join("",items);
+                items = new ArrayList<>();
+            } else if (indexNextString==i) {
+                continue;
+            } else {
+                items.add(""+chars[i]);
+            }
+        }
+        date = String.join("",items);
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        db.execSQL("DELETE FROM tasks WHERE task=? And taskDate=(?)", new Object[]{task,date});
         db.close();
     }
 
     // Method to load all tasks from the database and display in ListView
     private void loadTasks() {
+        onTodaysTasks = true;
+        Toast.makeText(this, "today's tasks list", Toast.LENGTH_SHORT).show();
         tasks = new ArrayList<>();
         SQLiteDatabase db = dbHelper.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM tasks", null);
+        String currentdate = new SimpleDateFormat("dd-MM-yyyy").format(new GregorianCalendar().getTime());
+        Cursor cursor = db.rawQuery("SELECT * FROM tasks WHERE taskDate = (?)", new String[]{currentdate});
         while (cursor.moveToNext()) {
             // Get the "task" column value and add it to the list
-            tasks.add(cursor.getString(cursor.getColumnIndexOrThrow("task")));
+            tasks.add(cursor.getString(0));
+            //tasks.add(cursor.getString(0)+":\n"+cursor.getString(1));
         }
         cursor.close();
         db.close();
+        // Set up the ArrayAdapter and attach it to the ListView
+        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, tasks);
+        listView.setAdapter(adapter);
+    }
 
+    private void loadFutureTasks(){
+        onTodaysTasks = false;
+        Toast.makeText(this, "future's tasks list", Toast.LENGTH_SHORT).show();
+        tasks = new ArrayList<>();
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        String currentdate = new SimpleDateFormat("dd-MM-yyyy").format(new GregorianCalendar().getTime());
+        Cursor cursor = db.rawQuery("SELECT * FROM tasks WHERE taskDate > (?)", new String[]{currentdate});
+        while (cursor.moveToNext()) {
+            // Get the "task" column value and add it to the list
+            tasks.add(cursor.getString(0)+":\n"+cursor.getString(1));
+        }
+        cursor.close();
+        db.close();
         // Set up the ArrayAdapter and attach it to the ListView
         adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, tasks);
         listView.setAdapter(adapter);
@@ -111,6 +157,18 @@ public class MainActivity extends AppCompatActivity {
                 , year, month, day
         );
         datePickerDialog.show();
+    }
+    private void removeSelectedListRow(String taskToDelete){
+        if (onTodaysTasks){
+            Toast.makeText(this, "great you finish: " + taskToDelete, Toast.LENGTH_SHORT).show();
+            removeTask(taskToDelete); // Remove from DB
+            loadTasks(); // Reload tasks to update ListView
+        }
+        else {
+            Toast.makeText(this, "the task deleted", Toast.LENGTH_SHORT).show();
+            removeFutureTask(taskToDelete);
+            loadFutureTasks(); // Reload tasks to update ListView
+        }
     }
 
     // Helper class to manage the SQLite database
@@ -144,23 +202,18 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
+        taskdate = new SimpleDateFormat("dd-MM-yyyy").format(new GregorianCalendar().getTime());
+
         // Bind ListView from layout
         listView = findViewById(R.id.listView);
 
         // Set item click listener to remove a task when clicked
         listView.setOnItemClickListener((parent, view, position, id) -> {
-            removeTask(tasks.get(position)); // Remove from DB
-            Toast.makeText(this, "great you finish: " + tasks.get(position), Toast.LENGTH_SHORT).show();
-            tasks.remove(position);          // Remove from list
-            adapter.notifyDataSetChanged();  // Update ListView
+            removeSelectedListRow(tasks.get(position));
         });
 
         // Initialize database helper
         dbHelper = new TaskDatabaseHelper(this);
-
-        // Load tasks in a separate thread
-        loadTasksThread = new Thread(){@Override public void run(){ loadTasks(); }};
-        loadTasksThread.start();
 
         // Start a thread to continuously update date/time
         datetimeThread = new Thread(){@Override public void run(){ try {
@@ -175,11 +228,21 @@ public class MainActivity extends AppCompatActivity {
 
         findViewById(R.id.addBtn).setOnClickListener(v -> {
             addTask(taskTextInput); // Add task to DB
-            loadTasks();            // Reload tasks to update ListView
         });
+
         findViewById(R.id.pickDateBtn).setOnClickListener(v -> {
             openDatePicker();
         });
 
+        switchTaskButton = findViewById(R.id.switchTasksBtn);
+        switchTaskButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                switchTaskButton.setText("today's tasks");
+                loadFutureTasks();
+            } else {
+                switchTaskButton.setText("future's tasks");
+                loadTasks();
+            }
+        });
     }
 }
