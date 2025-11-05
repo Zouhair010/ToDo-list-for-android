@@ -6,14 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-
-    <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:src="@drawable/todowallpaper"
-        android:scaleType="centerCrop"
-        android:contentDescription="background image" />
-
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/main"
         android:layout_width="match_parent"
@@ -24,11 +16,12 @@
             android:id="@+id/datTimeTextView"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
+            android:layout_marginTop="24dp"
             android:textAlignment="center"
+            android:textColor="@color/black"
+            android:textColorLink="@color/black"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:textColor="#FFFFFF"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -37,7 +30,7 @@
             android:id="@+id/inputLayout"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
+            android:layout_marginTop="18dp"
             android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -45,12 +38,13 @@
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/taskTextInput"
-                android:layout_width="0dp"
+                android:layout_width="321dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:hint="Make a task"
+                android:hint="make a task"
                 android:textColor="#000000"
-                android:textColorHint="#000000" />
+                android:textColorHighlight="#D0D0D0"
+                android:textColorHint="#949292" />
 
             <ImageButton
                 android:id="@+id/pickDateBtn"
@@ -78,6 +72,8 @@
             android:layout_marginTop="44dp"
             android:text="Show future's tasks"
             android:textAlignment="center"
+            android:textColor="@color/black"
+            android:textColorLink="#000000"
             android:textSize="16sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
@@ -88,6 +84,7 @@
             android:layout_width="377dp"
             android:layout_height="409dp"
             android:layout_marginTop="16dp"
+            android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
