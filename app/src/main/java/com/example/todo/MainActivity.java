@@ -4,6 +4,7 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.widget.ListView;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -37,9 +38,9 @@ public class MainActivity extends AppCompatActivity {
     // UI component to switch between today's tasks and future tasks
     private Switch switchTaskButton;
     // Static list to hold task strings for display
-    public static ArrayList<String> tasks;
+    private static ArrayList<String> tasks;
     // Static adapter to link the task list to the ListView
-    public static ArrayAdapter<String> adapter;
+    private static ArrayAdapter<String> adapter;
     // Thread dedicated to continuously updating the date and time display
     private static Thread datetimeThread;
     // Stores the date selected for a new task (defaults to current date)
@@ -49,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
 
     // Method to continuously update the date/time on a TextView every second,
     // and provide a task reminder every hour (3600 seconds).
-    private void showDateTime(TextView datetimeTextView) throws InterruptedException {
+    private void showDateTime(TextView datetimeTextView) {
         // Counter to track the number of seconds elapsed since the last hour marker (or start)
         int seconds = 0;
         // Infinite loop to keep the time updated
@@ -73,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
                     new SimpleDateFormat("MMM dd, yyyy hh:mm:ss a").format(new GregorianCalendar().getTime())
             ));
             // Pause the thread for 1 second (1000 milliseconds) before the next iteration
-            Thread.sleep(1000);
+            SystemClock.sleep(1000);
         }
     }
 
@@ -187,7 +188,7 @@ public class MainActivity extends AppCompatActivity {
             public android.view.View getView(int position, android.view.View convertView, android.view.ViewGroup parent) {
                 View view = super.getView(position, convertView, parent);
                 TextView textView = view.findViewById(android.R.id.text1);
-                textView.setTextColor(Color.parseColor("#000000"));
+                textView.setTextColor(Color.parseColor("#269FFF"));
                 textView.setTextSize(18);
                 return view;
             }
@@ -216,7 +217,7 @@ public class MainActivity extends AppCompatActivity {
             public android.view.View getView(int position, android.view.View convertView, android.view.ViewGroup parent) {
                 View view = super.getView(position, convertView, parent);
                 TextView textView = view.findViewById(android.R.id.text1);
-                textView.setTextColor(Color.parseColor("#000000"));
+                textView.setTextColor(Color.parseColor("#269FFF"));
                 textView.setTextSize(18);
                 return view;
             }
@@ -285,7 +286,7 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
-        findViewById(R.id.main).setBackgroundResource(R.drawable.background1);
+        //findViewById(R.id.main).setBackgroundResource(R.drawable.background1);
 
         // Initialize taskdate to the current date in the required format
         taskdate = new SimpleDateFormat("yyyy-MM-dd").format(new GregorianCalendar().getTime());
@@ -319,13 +320,13 @@ public class MainActivity extends AppCompatActivity {
         switchTaskButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
                 // If checked (ON state), show future tasks
-                findViewById(R.id.main).setBackgroundResource(R.drawable.background2);
+                //findViewById(R.id.main).setBackgroundResource(R.drawable.background2);
                 Toast.makeText(this, "future's tasks", Toast.LENGTH_SHORT).show();
                 switchTaskButton.setText("Show today's tasks");
                 loadFutureTasks();
             } else {
                 // If unchecked (OFF state), show today's tasks
-                findViewById(R.id.main).setBackgroundResource(R.drawable.background1);
+                //findViewById(R.id.main).setBackgroundResource(R.drawable.background1);
                 Toast.makeText(this, "today's tasks", Toast.LENGTH_SHORT).show();
                 switchTaskButton.setText("Show future's tasks");
                 loadTasks();
@@ -337,13 +338,9 @@ public class MainActivity extends AppCompatActivity {
         removePastTask();
 
         // Start a new background thread to run the date/time updater
-        datetimeThread = new Thread(){@Override public void run(){ try {
-            // Call the method to continuously update the time TextView
+        datetimeThread = new Thread(){@Override public void run(){
             showDateTime(findViewById(R.id.datTimeTextView));
-        } catch (InterruptedException e) {
-            // Print the stack trace if the thread is interrupted
-            e.printStackTrace();
-        }}};
+        }};
         datetimeThread.start(); // Start the background thread
     }
 

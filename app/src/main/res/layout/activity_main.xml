@@ -10,19 +10,22 @@
         android:id="@+id/main"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="#1E1E1E"
         android:padding="16dp">
 
         <TextView
             android:id="@+id/datTimeTextView"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="132dp"
+            android:background="@android:color/transparent"
             android:textAlignment="center"
-            android:textColor="@color/black"
-            android:textColorLink="@color/black"
+            android:textColor="#49D0DE"
+            android:textColorLink="#49D0DE"
             android:textSize="18sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -30,27 +33,32 @@
             android:id="@+id/inputLayout"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="18dp"
+            android:layout_marginTop="44dp"
             android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/datTimeTextView">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/taskTextInput"
                 android:layout_width="321dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
+                android:background="@android:color/transparent"
                 android:hint="make a task"
-                android:textColor="#000000"
+                android:textAlignment="center"
+                android:textColor="#49D0DE"
                 android:textColorHighlight="#D0D0D0"
-                android:textColorHint="#949292" />
+                android:textColorHint="#9E9E9E"
+                android:textColorLink="@color/white" />
 
             <ImageButton
                 android:id="@+id/pickDateBtn"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_marginStart="8dp"
+                android:backgroundTint="#C27CFD"
                 android:contentDescription="Pick date"
                 app:srcCompat="@android:drawable/ic_menu_today" />
         </LinearLayout>
@@ -60,7 +68,7 @@
             style="@style/Widget.AppCompat.Button.Small"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="28dp"
             android:text="Add"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/inputLayout" />
@@ -69,10 +77,11 @@
             android:id="@+id/switchTasksBtn"
             android:layout_width="214dp"
             android:layout_height="23dp"
-            android:layout_marginTop="44dp"
+            android:layout_marginTop="48dp"
+            android:layout_marginEnd="8dp"
             android:text="Show future's tasks"
             android:textAlignment="center"
-            android:textColor="@color/black"
+            android:textColor="#86F861"
             android:textColorLink="#000000"
             android:textSize="16sp"
             android:textStyle="bold"
@@ -81,14 +90,15 @@
 
         <ListView
             android:id="@+id/listView"
-            android:layout_width="377dp"
-            android:layout_height="409dp"
-            android:layout_marginTop="16dp"
+            android:layout_width="374dp"
+            android:layout_height="237dp"
+            android:layout_marginTop="29dp"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.6"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/addBtn" />
+            app:layout_constraintTop_toBottomOf="@+id/addBtn" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </FrameLayout>
