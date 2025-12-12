@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Switch;
 import android.widget.TextView;
 import androidx.activity.EdgeToEdge;
@@ -37,6 +38,10 @@ public class MainActivity extends AppCompatActivity {
     private ListView listView;
     // UI component to switch between today's tasks and future tasks
     private Switch switchTaskButton;
+    //Progress bar to visualize the completion rate of today's tasks.
+    private ProgressBar progressBar;
+    //TextView to display the percentage of completed tasks for the day.
+    private TextView displayPercentage;
     // Static list to hold task strings for display
     private static ArrayList<String> tasks;
     // Static adapter to link the task list to the ListView
@@ -47,6 +52,8 @@ public class MainActivity extends AppCompatActivity {
     private static String taskdate;
     // Flag to indicate which task list is currently displayed (true for today's tasks)
     private static boolean onTodaysTasks;
+    //Counter for the total number of tasks scheduled for today at the start of the activity.
+    private static int todaysTasksCounter = 0;
 
     // Method to continuously update the date/time on a TextView every second,
     // and provide a task reminder every hour (3600 seconds).
@@ -80,6 +87,7 @@ public class MainActivity extends AppCompatActivity {
 
     // Method to add a new task (with its date) to the SQLite database
     private void addTask() {
+        String currentdate = new SimpleDateFormat("yyyy-MM-dd").format(new GregorianCalendar().getTime());
         // 1. Retrieve the text input and convert it to a String
         String task = taskTextInput.getText().toString();
         // 2. Input Validation: Check if the task string is not empty
@@ -89,6 +97,7 @@ public class MainActivity extends AppCompatActivity {
             // Insert the task and its date into the 'tasks' table.
             // Using '?' as placeholders prevents SQL injection.
             db.execSQL("INSERT INTO tasks(task,taskDate) VALUES(?,?)", new Object[]{task,taskdate});
+            if (taskdate.equals(currentdate)) todaysTasksCounter++;
             // Reset the task date back to the current date for the next new task default
             taskdate = new SimpleDateFormat("yyyy-MM-dd").format(new GregorianCalendar().getTime());
             taskTextInput.setText(""); // Clear the input field after successful addition
@@ -155,7 +164,7 @@ public class MainActivity extends AppCompatActivity {
             if (tasks.size() > 0){
                 Toast.makeText(this, "your next task is: " + tasks.get(0), Toast.LENGTH_SHORT).show();
             }else {
-                Toast.makeText(this, "there's nothing next. ", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Good job, all tasks are completed. ", Toast.LENGTH_SHORT).show();
             }
         }
         else {
@@ -248,6 +257,30 @@ public class MainActivity extends AppCompatActivity {
         datePickerDialog.show(); // Display the dialog
     }
 
+    // Calculates and updates the UI to show the completion percentage of today's tasks.
+    // It compares the initial count of today's tasks with the current count.
+    private void completionRate(){
+        String currentdate = new SimpleDateFormat("yyyy-MM-dd").format(new GregorianCalendar().getTime());
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT COUNT(task) FROM tasks WHERE taskDate = ?", new String[]{currentdate});
+        int undoneTasksCounter = 0;
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                undoneTasksCounter = cursor.getInt(0);
+            }
+            cursor.close();
+        }
+        db.close();
+
+        double completionPercentage = (double) undoneTasksCounter/todaysTasksCounter ;
+        completionPercentage*=100.00;
+        if ((100.0-completionPercentage) > 0){
+            displayPercentage.setText((int) (100.00-completionPercentage)+"% of my today's tasks is done");
+        }
+        progressBar.setMax(100);
+        progressBar.setProgress((int) (100.00-completionPercentage));
+    }
+
     // Nested Helper class to manage the SQLite database creation and versioning
     private static class TaskDatabaseHelper extends SQLiteOpenHelper {
     // Constructor for the database helper
@@ -286,7 +319,8 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
-        //findViewById(R.id.main).setBackgroundResource(R.drawable.background1);
+        displayPercentage = findViewById(R.id.displayPercentage);
+        progressBar = findViewById(R.id.progressBar);
 
         // Initialize taskdate to the current date in the required format
         taskdate = new SimpleDateFormat("yyyy-MM-dd").format(new GregorianCalendar().getTime());
@@ -297,6 +331,7 @@ public class MainActivity extends AppCompatActivity {
         listView.setOnItemClickListener((parent, view, position, id) -> {
             // Get the task string at the clicked position and pass it for removal
             removeSelectedListRow(tasks.get(position));
+            completionRate();
         });
 
         // Initialize the database helper
@@ -307,6 +342,7 @@ public class MainActivity extends AppCompatActivity {
         // Set click listener for the "Add Task" button
         findViewById(R.id.addBtn).setOnClickListener(v -> {
             addTask(); // Call method to add the task
+            completionRate();
         });
 
         // Set click listener for the "Pick Date" button
@@ -333,9 +369,20 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT COUNT(task) FROM tasks WHERE taskDate = ?", new String[]{taskdate});
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                todaysTasksCounter = cursor.getInt(0);
+            }
+            cursor.close();
+        }
+        db.close();
+
         // Initial load of today's tasks when the activity starts (since switch is off by default)
         loadTasks();
         removePastTask();
+        completionRate();
 
         // Start a new background thread to run the date/time updater
         datetimeThread = new Thread(){@Override public void run(){

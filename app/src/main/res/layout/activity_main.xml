@@ -17,7 +17,7 @@
             android:id="@+id/datTimeTextView"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="132dp"
+            android:layout_marginTop="52dp"
             android:background="@android:color/transparent"
             android:textAlignment="center"
             android:textColor="#49D0DE"
@@ -25,7 +25,7 @@
             android:textSize="18sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -33,12 +33,12 @@
             android:id="@+id/inputLayout"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="44dp"
+            android:layout_marginTop="46dp"
             android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/datTimeTextView">
+            app:layout_constraintTop_toBottomOf="@+id/progressBar">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/taskTextInput"
@@ -99,6 +99,31 @@
             app:layout_constraintHorizontal_bias="0.6"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/addBtn" />
+
+        <TextView
+            android:id="@+id/displayPercentage"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="48dp"
+            android:textAlignment="center"
+            android:textColor="#06ED15"
+            android:textColorLink="#06ED15"
+            android:textSize="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/datTimeTextView" />
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/displayPercentage" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </FrameLayout>
